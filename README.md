@@ -8,3 +8,6 @@ A sample execution might look like: `python parser.py --csv 'sample.csv' --name 
 * config formatting instructions.
 * assumptions i made
 * changes for a real world system
+
+
+A sample csv called 'test.csv' and sample config file called 'config.json' are included. 

@@ -12,23 +12,25 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--csv', help="path to csv file")
 parser.add_argument('--config', help="path to config file")
 parser.add_argument('--name', help="name of sql table")
+parser.add_argument('--sample', help="path to where outputted sample should be stored")
 args = parser.parse_args()
 
 
 class Parser(object):
     def __init__(self):
         self.db = '{}{}'.format(str(args.name), '.db')
-        #self.d = Dataframe({'hi': [1,2]})
-        #print self.d
         self.df = read_csv(str(args.csv))
         # create connection to sqlite3
         self.cnx = sqlite3.connect(self.db)
 
     def parse_csv(self):
         """ call to perform all operations """
-        transform, sample = self.read_config()
-        self.parse_transform(transform)
-        self. parse_sample(sample)
+        if args.config:
+            transform, sample = self.read_config()
+            self.parse_transform(transform)
+            self.parse_sample(sample)
+        else:
+            self.df.to_csv(str(args.sample))
         # then use df.to_sql to write the values to a sql db ()
         self.df.to_sql(str(args.name), self.cnx, if_exists='replace')
 
@@ -48,13 +50,12 @@ class Parser(object):
 
     def parse_sample(self, sample):
         """ creates a csv of random and/or specified rows """
-        out = '{}{}'.format(str(args.name), '.csv')
         if 'rand' in sample.keys():
             out_df = self.df.sample(frac=float(sample['rand']), axis=0)
         if 'row' in sample.keys():
             out_df = self.df.iloc[self.create_index(sample['row'])]
 
-        out_df.to_csv(out)
+        out_df.to_csv(str(args.sample))
 
     def remove_cols(self, drop_cols):
         """ drops specified columns from the dataframe """
@@ -76,4 +77,5 @@ class Parser(object):
         # builds a list of (non-duplicated) indexes
         return list(chain.from_iterable(ranges))
 
+# execute file parsing class
 Parser().parse_csv()
